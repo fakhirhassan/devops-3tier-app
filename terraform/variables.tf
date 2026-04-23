@@ -1,0 +1,24 @@
+variable "aws_region" {
+  description = "AWS region to deploy resources"
+  type        = string
+}
+
+variable "ami_id" {
+  description = "AMI ID for the EC2 instance"
+  type        = string
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+}
+
+variable "project_name" {
+  description = "Project name used for resource naming"
+  type        = string
+}
+
+variable "s3_bucket_name" {
+  description = "Base name for the S3 bucket"
+  type        = string
+}

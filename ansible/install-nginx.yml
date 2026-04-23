@@ -1,0 +1,33 @@
+---
+- name: Install Nginx and deploy custom CV page
+  hosts: webservers
+  become: yes  # Run as root (sudo)
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Copy custom CV page to Nginx default site
+      copy:
+        src: cv.html
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Restart Nginx to apply changes
+      service:
+        name: nginx
+        state: restarted

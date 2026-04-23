@@ -1,0 +1,33 @@
+---
+- name: Create 2 users on Linux machine
+  hosts: webservers
+  become: yes  # Run as root (sudo)
+
+  tasks:
+    - name: Create user 'devuser1'
+      user:
+        name: devuser1
+        comment: "Dev User 1"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Create user 'devuser2'
+      user:
+        name: devuser2
+        comment: "Dev User 2"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Verify users were created
+      command: id {{ item }}
+      loop:
+        - devuser1
+        - devuser2
+      register: user_info
+
+    - name: Display user info
+      debug:
+        msg: "{{ item.stdout }}"
+      loop: "{{ user_info.results }}"

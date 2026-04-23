@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-Tier App on Kubernetes</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        h1 { color: #326ce5; text-align: center; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        button { background: #326ce5; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #2854b5; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 200px; margin-right: 10px; }
+        #output { margin-top: 20px; padding: 15px; background: #e8f0fe; border-radius: 4px; min-height: 50px; }
+        .info { color: #666; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>3-Tier Application on Kubernetes</h1>
+    <p class="info">Frontend (Nginx) → Backend (Flask API) → Database (MySQL)</p>
+
+    <div class="card">
+        <h2>Health Check</h2>
+        <button onclick="checkHealth()">Check Backend Health</button>
+        <div id="health"></div>
+    </div>
+
+    <div class="card">
+        <h2>Add Item</h2>
+        <input type="text" id="itemName" placeholder="Enter item name">
+        <button onclick="addItem()">Add</button>
+    </div>
+
+    <div class="card">
+        <h2>Items from Database</h2>
+        <button onclick="fetchData()">Fetch Data</button>
+        <div id="output">Click "Fetch Data" to load items...</div>
+    </div>
+
+    <script>
+        async function checkHealth() {
+            try {
+                const res = await fetch('/api/health');
+                const data = await res.json();
+                document.getElementById('health').innerHTML = '<p style="color:green">Status: ' + data.status + '</p>';
+            } catch(e) {
+                document.getElementById('health').innerHTML = '<p style="color:red">Backend unreachable</p>';
+            }
+        }
+
+        async function addItem() {
+            const name = document.getElementById('itemName').value;
+            if (!name) return alert('Enter an item name');
+            try {
+                const res = await fetch('/api/data', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: name})
+                });
+                const data = await res.json();
+                document.getElementById('itemName').value = '';
+                alert(data.message);
+                fetchData();
+            } catch(e) {
+                alert('Error adding item');
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch('/api/data');
+                const data = await res.json();
+                let html = '<ul>';
+                data.items.forEach(item => {
+                    html += '<li><strong>' + item.name + '</strong> (added: ' + item.created_at + ')</li>';
+                });
+                html += '</ul>';
+                document.getElementById('output').innerHTML = data.items.length ? html : 'No items yet.';
+            } catch(e) {
+                document.getElementById('output').innerHTML = '<p style="color:red">Error fetching data</p>';
+            }
+        }
+    </script>
+</body>
+</html>
