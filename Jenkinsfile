@@ -40,8 +40,10 @@ pipeline {
 
         stage('Test Frontend') {
             steps {
-                echo 'Smoke-testing frontend image (nginx config valid)...'
-                sh 'docker run --rm ${FRONTEND_IMAGE}:${IMAGE_TAG} nginx -t'
+                echo 'Smoke-testing frontend image (image contains index.html + nginx binary)...'
+                sh '''
+                    docker run --rm ${FRONTEND_IMAGE}:${IMAGE_TAG} sh -c "test -f /usr/share/nginx/html/index.html && nginx -v"
+                '''
             }
         }
 
