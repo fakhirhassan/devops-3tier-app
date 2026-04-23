@@ -87,7 +87,7 @@ pipeline {
                 sh '''
                     sleep 10
                     curl -fsS http://${APP_HOST}/ > /dev/null && echo "Frontend responding on :80"
-                    curl -fsS http://${APP_HOST}:5000/api/health && echo ""
+                    curl -fsS http://${APP_HOST}/api/health && echo ""
                 '''
             }
         }
