@@ -1,0 +1,53 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: app-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: three_tier_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpassword123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend-service:
+    image: fakhirhassan/devops-3tier-backend:latest
+    container_name: app-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: rootpassword123
+      DB_NAME: three_tier_db
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    networks:
+      - app-net
+
+  frontend:
+    image: fakhirhassan/devops-3tier-frontend:latest
+    container_name: app-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend-service
+    ports:
+      - "80:80"
+    networks:
+      - app-net
+
+volumes:
+  mysql-data:
+
+networks:
+  app-net:
+    driver: bridge
